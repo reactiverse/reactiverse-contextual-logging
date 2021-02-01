@@ -1,0 +1,248 @@
+= Contextual logging for Vert.x
+:group-id: io.reactiverse
+:artifact-id: vertx-contextual-logging
+:version: 1.0.0-alpha
+
+image:https://travis-ci.org/tsegismont/vertx-contextual-logging.svg?branch=master["Build Status", link="https://travis-ci.org/tsegismont/vertx-contextual-logging"]
+
+MDC-style logging, in a world without ``ThreadLocal``s.
+
+== Purpose
+
+In web application logs, messages come from different users and requests.
+When a problem occurs, it can be difficult to determine which ones are related to the issue, especially under load.
+
+In traditional Java development models (e.g. Spring or Java EE), the server implements a _one thread per request_ design.
+As a consequence, it is possible to store contextual data in `ThreadLocal` variables and use it when logging.
+Both https://logback.qos.ch/manual/mdc.html[`logback`] and https://logging.apache.org/log4j/2.x/manual/thread-context.html[`log4j2`] name this _Mapped Diagnostic Context_ (MDC).
+
+Vert.x implements http://vertx.io/docs/vertx-core/java/#_reactor_and_multi_reactor[the reactor pattern].
+In practice, this means many concurrent requests can be handled by the same thread, thus preventing usage of ``ThreadLocal``s to store contextual data.
+
+This project uses an alternative storage method for contextual data and makes it possible to have MDC-style logging in Vert.x applications.
+
+== Supported logging libraries
+
+* Logback
+* Log4j2
+* JUL
+
+== How it works
+
+Vert.x 4 introduces a Tracing SPI.
+To transport tracing information, a new `localContext` data map is attached to standard and worker contexts.
+
+This library:
+
+* uses the `localContext` data map to store contextual data
+* implements logging converters that retrieve contextual data from the `localContext` data map
+
+== Dependency setup
+
+=== Maven
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>{group-id}</groupId>
+  <artifactId>{artifact-id}</artifactId>
+  <version>{version}</version>
+</dependency>
+----
+
+=== Gradle Kotlin DSL
+
+[source,kotlin,subs="attributes+"]
+----
+implementation("{group-id}:{artifact-id}:{version}")
+----
+
+=== Gradle Groovy DSL:
+
+[source,groovy,subs="attributes+"]
+----
+implementation '{group-id}:{artifact-id}:{version}'
+----
+
+== Usage
+
+=== Configuration
+
+==== Logback
+
+Declare the converter class and assign it a conversion word:
+
+[source,xml]
+----
+  <conversionRule conversionWord="vcl"
+                  converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+----
+
+Then use the conversion word in conversion patterns:
+
+[source,xml]
+----
+<pattern>%d{HH:mm:ss.SSS} [%thread] [%vcl{requestId}] %-5level %logger{36} - %msg%n</pattern>
+----
+
+In the example above, the `requestId` will be added to the logs.
+
+A default value can be provided:
+
+----
+%vcl{requestId:-foobar}
+----
+
+In this case, `foobar` will be added to the logs if the `requestId` is missing in contextual data or the logger is used on a non Vert.x thread.
+
+Below is a sample Logback configuration:
+
+[source,xml]
+----
+<configuration>
+
+  <conversionRule conversionWord="vcl"
+                  converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] [%vcl{requestId}] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+  </root>
+
+</configuration>
+----
+
+==== Log4j2
+
+With Log4j2, the converter is configured automatically.
+It works like the Logback converter, except the conversion word is fixed to `vcl`.
+
+Below is a sample Log4j2 configuration:
+
+[source,xml]
+----
+<Configuration status="INFO">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout>
+        <pattern>%d{HH:mm:ss.SSS} [%thread] [%vcl{requestId}] %-5level %logger{36} - %msg%n</pattern>
+      </PatternLayout>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="INFO">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>
+----
+
+==== JUL
+
+With JUL, the converter is a formatter that follows the `SimpleFormatter` implementation (https://docs.oracle.com/javase/8/docs/api/java/util/Formatter.html#syntax).
+JUL parameters are located by index, not name, however this formatter allows refering to them by name by using the extended format:
+
+----
+%{nameOfVariable}
+----
+
+Be aware that JUL reserves the following variable names:
+
+* date
+* source
+* logger
+* level
+* message
+* thrown
+
+Optionally a default value is allowed to be given using the `:-` suffix:
+
+----
+%{nameOfVariable:-defaultValue}
+----
+
+In order to format the value itself, follow the standard formatter rules, for example to format as `String`:
+
+----
+%{nameOfVariable:-defaultValue}$s
+----
+
+To add it to any kind of `Handler` just specify the class `JULContextualDataFormatter` as the handler `Formatter`.
+
+[source,properties]
+----
+handlers=java.util.logging.ConsoleHandler
+java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.JULContextualDataFormatter
+io.reactiverse.contextual.logging.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"
+----
+
+=== Saving values in the contextual data map
+
+Import the `io.reactiverse.contextual.logging.ContextualData` class.
+
+In the server implementation, store contextual data when the request is received:
+
+[source,java]
+----
+vertx.createHttpServer()
+  .requestHandler(req -> {
+    String requestId = generateId(req);
+    ContextualData.put("requestId", requestId);
+    log.info("Received HTTP request");
+    // ... handle request
+    webClient.send(ar -> {
+      // ... requestId is still present in contextual data map here
+    })
+  }).listen(8080);
+----
+
+In Vert.x Web applications, it is possible to create a catch-all route for this and add it at the top of the router setup.
+
+=== Propagation
+
+Contextual data is restored when asynchronous result handlers are invoked.
+For example, it is restored when using the Vert.x:
+
+* Web Client
+* Mongo Client
+* Cassandra Client
+* SQL Clients (PostgreSQL, MySQL)
+* ... etc
+
+It's also restored when a timer fires or when a task is submitted to `executeBlocking` or completes.
+
+However, contextual data is not propagated over the `EventBus`.
+In this case, it must be:
+
+* added to message headers on the sender side
+* retrieved from headers and saved again on the receiver side
+
+This process can be automated with `EventBus` interceptors:
+
+[source,java]
+----
+vertx.eventBus().addOutboundInterceptor(event -> {
+  String requestId = ContextualData.get("requestId");
+  if (requestId != null) {
+    event.message().headers().add("requestId", requestId);
+  }
+  event.next();
+});
+
+vertx.eventBus().addInboundInterceptor(event -> {
+  String requestId = event.message().headers().get("requestId");
+  if (requestId != null) {
+    ContextualData.put("requestId", requestId);
+  }
+  event.next();
+});
+----
+
+== License
+
+Apache License version 2.0.
