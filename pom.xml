@@ -153,8 +153,9 @@
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <id>bintray</id>
+      <name>reactiverse-releases</name>
+      <url>https://api.bintray.com/maven/reactiverse/releases/io.reactiverse:vertx-contextual-logging/;publish=1;override=1</url>
     </repository>
   </distributionManagement>
 
