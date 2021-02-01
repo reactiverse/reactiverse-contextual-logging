@@ -3,7 +3,7 @@
 :artifact-id: vertx-contextual-logging
 :version: 1.0.0-alpha
 
-image:https://travis-ci.org/reactiverse/reactiverse-contextual-logging.svg?branch=master["Build Status", link="https://travis-ci.org/reactiverse/reactiverse-contextual-logging"]
+image:https://github.com/reactiverse/reactiverse-contextual-logging/workflows/CI/badge.svg["Build Status", link="https://github.com/reactiverse/reactiverse-contextual-logging/actions?query=workflow%3ACI"]
 
 MDC-style logging, in a world without ``ThreadLocal``s.
 
