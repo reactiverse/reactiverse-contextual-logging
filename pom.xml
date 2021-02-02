@@ -148,7 +148,7 @@
         <configuration>
           <useReleaseProfile>false</useReleaseProfile>
           <releaseProfiles>release</releaseProfiles>
-          <goals>deploy</goals>
+          <goals>deploy scm-publish:publish-scm</goals>
           <tagNameFormat>@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
