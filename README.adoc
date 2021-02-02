@@ -1,6 +1,6 @@
 = Contextual logging for Vert.x
 :group-id: io.reactiverse
-:artifact-id: vertx-contextual-logging
+:artifact-id: reactiverse-contextual-logging
 :version: 1.0.0-alpha
 
 image:https://github.com/reactiverse/reactiverse-contextual-logging/workflows/CI/badge.svg?branch=main["Build Status", link="https://github.com/reactiverse/reactiverse-contextual-logging/actions?query=workflow%3ACI"]

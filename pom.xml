@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.reactiverse</groupId>
-  <artifactId>vertx-contextual-logging</artifactId>
+  <artifactId>reactiverse-contextual-logging</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
