@@ -60,7 +60,7 @@ public class ContextualData {
    *
    * @return the value or null if absent or the method is invoked on a non Vert.x thread
    */
-  public static String getOrDefault(String key) {
+  public static String get(String key) {
     Objects.requireNonNull(key);
     ContextInternal ctx = (ContextInternal) Vertx.currentContext();
     if (ctx != null) {
