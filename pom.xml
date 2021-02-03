@@ -182,7 +182,6 @@
               <pubScmUrl>${project.scm.developerConnection}</pubScmUrl>
               <scmBranch>gh-pages</scmBranch>
               <content>${project.build.directory}/generated-docs</content>
-              <include>index.html</include>
               <checkinComment>Release ${project.version}</checkinComment>
             </configuration>
           </plugin>
