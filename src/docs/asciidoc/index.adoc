@@ -37,7 +37,7 @@ To transport distributed traces information, a new `localContext` data map is at
 This library:
 
 * uses the `localContext` data map to store contextual data
-* implements logging converters that retrieve contextual data from the `localContext` data map
+* implements logging extensions that retrieve contextual data from the `localContext` data map
 
 == Dependency setup
 
@@ -124,7 +124,15 @@ Below is a sample Logback configuration:
 
 ==== Log4j2
 
-With Log4j2, the converter is configured automatically.
+With Log4j2, you can either use:
+
+* the xref:log4j2_pattern_converter[pattern converter], or
+* the xref:log4j2_context_data_provider[context data provider].
+
+[#log4j2_pattern_converter]
+===== Pattern Converter
+
+The Log4j2 pattern converter is configured automatically.
 It works like the Logback converter, except the conversion word is fixed to `vcl`.
 
 Below is a sample Log4j2 configuration:
@@ -146,6 +154,30 @@ Below is a sample Log4j2 configuration:
   </Loggers>
 </Configuration>
 ----
+
+[#log4j2_context_data_provider]
+===== Context Data Provider
+
+The context data provider supplies log4j2 logging events with contextual data.
+The data can then be retrieved using https://logging.apache.org/log4j/2.x/manual/lookups.html#ContextMapLookup[context map lookups].
+
+To enable the provider, create a `META-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider` file which this content:
+
+----
+io.reactiverse.contextual.logging.VertxContextDataProvider
+----
+
+===== Comparison
+
+The pattern converter:
+
+* can only be used in https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout[pattern layouts]
+* is only invoked if the appender actually writes event data to the destination
+
+The context data provider:
+
+* can be used anywhere log4j2 supports https://logging.apache.org/log4j/2.x/manual/lookups.html#ContextMapLookup[context map lookups] (e.g. https://logging.apache.org/log4j/2.x/manual/layouts.html#JSONLayout[JSON layout])
+* is invoked anytime log4j creates a logging event
 
 ==== JUL
 
