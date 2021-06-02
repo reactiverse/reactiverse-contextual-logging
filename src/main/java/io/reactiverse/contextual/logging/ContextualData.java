@@ -89,7 +89,7 @@ public class ContextualData {
   /**
    * Get all values from the contextual data map.
    *
-   * @return the values or null if the method is invoked on a non Vert.x thread
+   * @return the values or {@code null} if the method is invoked on a non Vert.x thread
    */
   public static Map<String, String> getAll() {
     ContextInternal ctx = (ContextInternal) Vertx.currentContext();
@@ -99,9 +99,9 @@ public class ContextualData {
     return null;
   }
 
-  @SuppressWarnings("unchecked")
-  private static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
-    Objects.requireNonNull(ctx);
-    return (ConcurrentMap) ctx.localContextData().computeIfAbsent(ContextualData.class, k -> new ConcurrentHashMap());
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
+    ConcurrentMap<Object, Object> lcd = Objects.requireNonNull(ctx).localContextData();
+    return (ConcurrentMap) lcd.computeIfAbsent(ContextualData.class, k -> new ConcurrentHashMap());
   }
 }
