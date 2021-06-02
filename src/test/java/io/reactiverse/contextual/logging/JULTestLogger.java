@@ -32,9 +32,6 @@ public class JULTestLogger implements TestLogger {
 
   public JULTestLogger(String pattern) {
     baos = new ByteArrayOutputStream();
-    // WARNING: the pattern is not compatible with the JUL formatter so this must be manually modified
-    // WARNING: if the upstream test changes
-    pattern = "%{requestId:-foobar}$s ### %5$s%n";
     delegate.setLevel(Level.FINEST);
     handler = new StreamHandler(baos, new JULContextualDataFormatter(pattern));
     delegate.addHandler(handler);

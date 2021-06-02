@@ -57,7 +57,7 @@ public class ContextualLoggingTest extends VertxTestBase {
 
   @Test
   public void testJUL() {
-    log = new JULTestLogger(LOGGING_PATTERN);
+    log = new JULTestLogger("%{requestId:-foobar}$s ### %5$s%n");
     testContextualLogging(log);
   }
 
