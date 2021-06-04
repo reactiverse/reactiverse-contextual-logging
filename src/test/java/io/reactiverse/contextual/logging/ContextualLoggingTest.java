@@ -39,19 +39,24 @@ import static java.util.stream.Collectors.*;
 public class ContextualLoggingTest extends VertxTestBase {
 
   private static final String REQUEST_ID_HEADER = "x-request-id";
-  private static final String LOGGING_PATTERN = "%vcl{requestId:-foobar} ### %msg%n";
 
   private TestLogger log;
 
   @Test
   public void testLogback() {
-    log = new LogbackTestLogger(LOGGING_PATTERN);
+    log = new LogbackTestLogger("%vcl{requestId:-foobar} ### %msg%n");
     testContextualLogging(log);
   }
 
   @Test
-  public void testLog4j2() {
-    log = new Log4j2TestLogger(LOGGING_PATTERN);
+  public void testLog4j2Converter() {
+    log = new Log4j2TestLogger("%vcl{requestId:-foobar} ### %msg%n");
+    testContextualLogging(log);
+  }
+
+  @Test
+  public void testLog4j2ContextMapLookup() {
+    log = new Log4j2TestLogger("${ctx:requestId:-foobar} ### %msg%n");
     testContextualLogging(log);
   }
 
