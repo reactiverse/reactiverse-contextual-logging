@@ -48,6 +48,13 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <classifier>processor</classifier>
+      <version>${vertx.version}</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>${logback.version}</version>
@@ -81,44 +88,6 @@
   </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <!-- Configure the execution of the compiler to execute the codegen processor -->
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.1</version>
-          <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
-            <encoding>${project.build.sourceEncoding}</encoding>
-            <!-- Important: there are issues with apt and incremental compilation in the maven-compiler-plugin -->
-            <useIncrementalCompilation>false</useIncrementalCompilation>
-          </configuration>
-          <executions>
-            <execution>
-              <id>default-compile</id>
-              <configuration>
-                <annotationProcessors>
-                  <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-                </annotationProcessors>
-                <!-- It is new option since v3.5 to instruct compiler detect annotation processors classpath -->
-                <annotationProcessorPaths>
-                  <path>
-                    <groupId>io.vertx</groupId>
-                    <artifactId>vertx-codegen</artifactId>
-                    <version>${vertx.version}</version>
-                  </path>
-                  <!-- ... more path such as vertx-service-proxy/vertx-rx-java2 depends on what you want to generate ... -->
-                </annotationProcessorPaths>
-                <compilerArgs>
-                  <arg>-Acodegen.output=${project.basedir}/src/main</arg>
-                </compilerArgs>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.asciidoctor</groupId>
