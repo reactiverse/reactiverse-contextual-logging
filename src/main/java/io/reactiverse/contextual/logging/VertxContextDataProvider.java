@@ -17,14 +17,13 @@
 
 package io.reactiverse.contextual.logging;
 
+import io.reactiverse.contextual.logging.impl.ContextualDataImpl;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import org.apache.logging.log4j.core.util.ContextDataProvider;
 
 import java.util.Collections;
 import java.util.Map;
-
-import static io.reactiverse.contextual.logging.ContextualData.contextualDataMap;
 
 /**
  * Supplies log4j2 log events with Vert.x Contextual Data.
@@ -35,7 +34,7 @@ public class VertxContextDataProvider implements ContextDataProvider {
   public Map<String, String> supplyContextData() {
     ContextInternal ctx = (ContextInternal) Vertx.currentContext();
     if (ctx != null) {
-      return Collections.unmodifiableMap(contextualDataMap(ctx));
+      return Collections.unmodifiableMap(ContextualDataImpl.contextualDataMap(ctx));
     }
     return Collections.emptyMap();
   }

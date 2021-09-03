@@ -16,23 +16,16 @@
 
 package io.reactiverse.contextual.logging;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.impl.ContextInternal;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.reactiverse.contextual.logging.impl.ContextualDataImpl;
+import io.vertx.codegen.annotations.VertxGen;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Helper to store data in the local context.
  */
-public class ContextualData {
-
-  private static final Logger log = LoggerFactory.getLogger(ContextualData.class);
+@VertxGen
+public interface ContextualData {
 
   /**
    * Put a value in the contextual data map.
@@ -40,17 +33,8 @@ public class ContextualData {
    * @param key the key of the data in the contextual data map
    * @param value the data value
    */
-  public static void put(String key, String value) {
-    Objects.requireNonNull(key);
-    Objects.requireNonNull(value);
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
-    if (ctx == null) {
-      if (log.isTraceEnabled()) {
-        log.trace("Attempt to set contextual data from a non Vert.x thread", new Exception());
-      }
-    } else {
-      contextualDataMap(ctx).put(key, value);
-    }
+  static void put(String key, String value) {
+    ContextualDataImpl.put(key, value);
   }
 
   /**
@@ -60,13 +44,8 @@ public class ContextualData {
    *
    * @return the value or null if absent or the method is invoked on a non Vert.x thread
    */
-  public static String get(String key) {
-    Objects.requireNonNull(key);
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
-    if (ctx != null) {
-      return contextualDataMap(ctx).get(key);
-    }
-    return null;
+  static String get(String key) {
+    return ContextualDataImpl.get(key);
   }
 
   /**
@@ -77,13 +56,8 @@ public class ContextualData {
    *
    * @return the value or the {@code defaultValue} if absent or the method is invoked on a non Vert.x thread
    */
-  public static String getOrDefault(String key, String defaultValue) {
-    Objects.requireNonNull(key);
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
-    if (ctx != null) {
-      return contextualDataMap(ctx).getOrDefault(key, defaultValue);
-    }
-    return defaultValue;
+  static String getOrDefault(String key, String defaultValue) {
+    return ContextualDataImpl.getOrDefault(key, defaultValue);
   }
 
   /**
@@ -91,17 +65,7 @@ public class ContextualData {
    *
    * @return the values or {@code null} if the method is invoked on a non Vert.x thread
    */
-  public static Map<String, String> getAll() {
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
-    if (ctx != null) {
-      return new HashMap<>(contextualDataMap(ctx));
-    }
-    return null;
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
-    ConcurrentMap<Object, Object> lcd = Objects.requireNonNull(ctx).localContextData();
-    return (ConcurrentMap) lcd.computeIfAbsent(ContextualData.class, k -> new ConcurrentHashMap());
+  static Map<String, String> getAll() {
+    return ContextualDataImpl.getAll();
   }
 }
