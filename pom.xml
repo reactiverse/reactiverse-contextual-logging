@@ -33,6 +33,7 @@
     <vertx.version>4.0.0</vertx.version>
     <logback.version>1.2.3</logback.version>
     <log4j2.version>2.14.0</log4j2.version>
+    <doc.outputDirectory>${project.build.directory}/generated-docs</doc.outputDirectory>
   </properties>
 
   <dependencies>
@@ -99,6 +100,7 @@
             <artifact-id>${project.artifactId}</artifact-id>
             <version>${project.version}</version>
           </attributes>
+          <outputDirectory>${doc.outputDirectory}</outputDirectory>
         </configuration>
         <executions>
           <execution>
