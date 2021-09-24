@@ -1,9 +1,0 @@
-= Releasing
-
-IMPORTANT: use JDK 1.8
-
-----
-export JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk"
-mvn release:clean release:prepare
-mvn release:perform
-----
