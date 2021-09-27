@@ -442,8 +442,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>Contextual logging for Eclipse Vert.x</h1>
 <div class="details">
-<span id="revnumber">version 1.0.0,</span>
-<span id="revdate">2021-02-02</span>
+<span id="revnumber">version 1.1.0,</span>
+<span id="revdate">2021-09-27</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -463,7 +463,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_configuration">Configuration</a>
 <ul class="sectlevel3">
 <li><a href="#_logback">Logback</a></li>
-<li><a href="#_log4j2">Log4j2</a></li>
+<li><a href="#_log4j2">Log4j2</a>
+<ul class="sectlevel4">
+<li><a href="#log4j2_pattern_converter">Pattern Converter</a></li>
+<li><a href="#log4j2_context_data_provider">Context Data Provider</a></li>
+<li><a href="#_comparison">Comparison</a></li>
+</ul>
+</li>
 <li><a href="#_jul">JUL</a></li>
 </ul>
 </li>
@@ -531,7 +537,7 @@ To transport distributed traces information, a new <code>localContext</code> dat
 <p>uses the <code>localContext</code> data map to store contextual data</p>
 </li>
 <li>
-<p>implements logging converters that retrieve contextual data from the <code>localContext</code> data map</p>
+<p>implements logging extensions that retrieve contextual data from the <code>localContext</code> data map</p>
 </li>
 </ul>
 </div>
@@ -547,7 +553,7 @@ To transport distributed traces information, a new <code>localContext</code> dat
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
   &lt;groupId&gt;io.reactiverse&lt;/groupId&gt;
   &lt;artifactId&gt;reactiverse-contextual-logging&lt;/artifactId&gt;
-  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -556,7 +562,7 @@ To transport distributed traces information, a new <code>localContext</code> dat
 <h3 id="_gradle_kotlin_dsl">Gradle Kotlin DSL</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="kotlin" class="language-kotlin hljs">implementation("io.reactiverse:reactiverse-contextual-logging:1.0.0")</code></pre>
+<pre class="highlightjs highlight"><code data-lang="kotlin" class="language-kotlin hljs">implementation("io.reactiverse:reactiverse-contextual-logging:1.1.0")</code></pre>
 </div>
 </div>
 </div>
@@ -564,7 +570,7 @@ To transport distributed traces information, a new <code>localContext</code> dat
 <h3 id="_gradle_groovy_dsl">Gradle Groovy DSL</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="groovy" class="language-groovy hljs">implementation 'io.reactiverse:reactiverse-contextual-logging:1.0.0'</code></pre>
+<pre class="highlightjs highlight"><code data-lang="groovy" class="language-groovy hljs">implementation 'io.reactiverse:reactiverse-contextual-logging:1.1.0'</code></pre>
 </div>
 </div>
 </div>
@@ -645,7 +651,22 @@ To transport distributed traces information, a new <code>localContext</code> dat
 <div class="sect3">
 <h4 id="_log4j2">Log4j2</h4>
 <div class="paragraph">
-<p>With Log4j2, the converter is configured automatically.
+<p>With Log4j2, you can either use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the <a href="#log4j2_pattern_converter">pattern converter</a>, or</p>
+</li>
+<li>
+<p>the <a href="#log4j2_context_data_provider">context data provider</a>.</p>
+</li>
+</ul>
+</div>
+<div class="sect4">
+<h5 id="log4j2_pattern_converter">Pattern Converter</h5>
+<div class="paragraph">
+<p>The Log4j2 pattern converter is configured automatically.
 It works like the Logback converter, except the conversion word is fixed to <code>vcl</code>.</p>
 </div>
 <div class="paragraph">
@@ -667,6 +688,51 @@ It works like the Logback converter, except the conversion word is fixed to <cod
     &lt;/Root&gt;
   &lt;/Loggers&gt;
 &lt;/Configuration&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="log4j2_context_data_provider">Context Data Provider</h5>
+<div class="paragraph">
+<p>The context data provider supplies log4j2 logging events with contextual data.
+The data can then be retrieved using <a href="https://logging.apache.org/log4j/2.x/manual/lookups.html#ContextMapLookup">context map lookups</a>.</p>
+</div>
+<div class="paragraph">
+<p>To enable the provider, create a <code>META-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider</code> file which this content:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>io.reactiverse.contextual.logging.VertxContextDataProvider</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_comparison">Comparison</h5>
+<div class="paragraph">
+<p>The pattern converter:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>can only be used in <a href="https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout">pattern layouts</a></p>
+</li>
+<li>
+<p>is only invoked if the appender actually writes event data to the destination</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The context data provider:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>can be used anywhere log4j2 supports <a href="https://logging.apache.org/log4j/2.x/manual/lookups.html#ContextMapLookup">context map lookups</a> (e.g. <a href="https://logging.apache.org/log4j/2.x/manual/layouts.html#JSONLayout">JSON layout</a>)</p>
+</li>
+<li>
+<p>is invoked anytime log4j creates a logging event</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
