@@ -34,6 +34,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static io.netty.util.internal.StringUtil.NEWLINE;
 import static java.util.stream.Collectors.*;
 
 public class ContextualLoggingTest extends VertxTestBase {
@@ -109,7 +110,7 @@ public class ContextualLoggingTest extends VertxTestBase {
       .build()
       .collect(toList());
     for (List<String> messages : allMessagesById.values()) {
-      assertEquals(expected, messages);
+      assertEquals(String.join(NEWLINE, log.getOutput()), expected, messages);
     }
   }
 
