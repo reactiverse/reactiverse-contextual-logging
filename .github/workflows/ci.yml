@@ -27,7 +27,7 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.jdk }}
       - name: Run tests
-        run: mvn -B test
+        run: mvn -B verify
   Deploy:
     name: Deploy Snapshot to OSSRH
     if: ${{ github.repository_owner == 'reactiverse' && (github.event_name == 'push' || github.event_name == 'schedule') && !startsWith(github.ref, 'refs/tags/') }}
@@ -48,7 +48,7 @@ jobs:
         run: echo "PROJECT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:evaluate -Dexpression=project.version -B | grep -v '\[')" >> $GITHUB_ENV
       - name: Maven deploy
         if: ${{ endsWith(env.PROJECT_VERSION, '-SNAPSHOT') }}
-        run: mvn deploy -DskipTests -B
+        run: mvn deploy -DskipTests -DskipITs -B
         env:
           SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
@@ -71,7 +71,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: Maven deploy
-        run: mvn -Prelease deploy -DskipTests -Ddoc.outputDirectory=./public -B
+        run: mvn -Prelease deploy -DskipTests -DskipITs -Ddoc.outputDirectory=./public -B
         env:
           SONATYPE_NEXUS_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
