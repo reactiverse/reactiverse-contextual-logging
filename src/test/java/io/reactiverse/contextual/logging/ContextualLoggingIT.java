@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Red Hat, Inc.
+ * Copyright 2022 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -27,7 +27,12 @@ import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,38 +42,15 @@ import java.util.stream.Stream;
 import static io.netty.util.internal.StringUtil.NEWLINE;
 import static java.util.stream.Collectors.*;
 
-public class ContextualLoggingTest extends VertxTestBase {
+public class ContextualLoggingIT extends VertxTestBase {
 
   private static final String REQUEST_ID_HEADER = "x-request-id";
 
-  private TestLogger log;
+  private static final Logger log = LoggerFactory.getLogger(ContextualLoggingIT.class);
 
   @Test
-  public void testLogback() {
-    log = new LogbackTestLogger("%vcl{requestId:-foobar} ### %msg%n");
-    testContextualLogging(log);
-  }
-
-  @Test
-  public void testLog4j2Converter() {
-    log = new Log4j2TestLogger("%vcl{requestId:-foobar} ### %msg%n");
-    testContextualLogging(log);
-  }
-
-  @Test
-  public void testLog4j2ContextMapLookup() {
-    log = new Log4j2TestLogger("${ctx:requestId:-foobar} ### %msg%n");
-    testContextualLogging(log);
-  }
-
-  @Test
-  public void testJUL() {
-    log = new JULTestLogger("%{requestId:-foobar}$s ### %5$s%n");
-    testContextualLogging(log);
-  }
-
-  private void testContextualLogging(TestLogger log) {
-    vertx.deployVerticle(new TestVerticle(log), onSuccess(id -> {
+  public void testContextualLogging() {
+    vertx.deployVerticle(new TestVerticle(), onSuccess(id -> {
       List<String> ids = IntStream.range(0, 10).mapToObj(i -> UUID.randomUUID().toString()).collect(toList());
       sendRequests(ids, onSuccess(v -> {
         try {
@@ -92,8 +74,8 @@ public class ContextualLoggingTest extends VertxTestBase {
     CompositeFuture.all(futures).<Void>mapEmpty().onComplete(handler);
   }
 
-  private void verifyOutput(List<String> ids) {
-    List<String> output = log.getOutput();
+  private void verifyOutput(List<String> ids) throws IOException {
+    List<String> output = Files.readAllLines(Paths.get("target", ContextualLoggingIT.class.getSimpleName() + ".log"));
     assertEquals("foobar ### Started!", output.get(0));
     Map<String, List<String>> allMessagesById = output.stream()
       .skip(1)
@@ -110,18 +92,13 @@ public class ContextualLoggingTest extends VertxTestBase {
       .build()
       .collect(toList());
     for (List<String> messages : allMessagesById.values()) {
-      assertEquals(String.join(NEWLINE, log.getOutput()), expected, messages);
+      assertEquals(String.join(NEWLINE, output), expected, messages);
     }
   }
 
   private static class TestVerticle extends AbstractVerticle {
 
-    private final TestLogger logger;
     private HttpRequest<JsonObject> request;
-
-    private TestVerticle(TestLogger logger) {
-      this.logger = logger;
-    }
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
@@ -135,22 +112,22 @@ public class ContextualLoggingTest extends VertxTestBase {
 
           String requestId = req.getHeader(REQUEST_ID_HEADER);
           ContextualData.put("requestId", requestId);
-          logger.log("Received HTTP request ### " + requestId);
+          log.info("Received HTTP request ### " + requestId);
 
           vertx.setTimer(50, l -> {
 
-            logger.log("Timer fired ### " + requestId);
+            log.info("Timer fired ### " + requestId);
 
             vertx.executeBlocking(fut -> {
 
               fut.complete();
-              logger.log("Blocking task executed ### " + requestId);
+              log.info("Blocking task executed ### " + requestId);
 
             }, false, bar -> {
 
               request.send(rar -> {
 
-                logger.log("Received Web Client response ### " + requestId);
+                log.info("Received Web Client response ### " + requestId);
                 req.response().end();
 
               });
@@ -160,7 +137,7 @@ public class ContextualLoggingTest extends VertxTestBase {
 
         }).listen(8080, httpServerPromise);
 
-      logger.log("Started!");
+      log.info("Started!");
     }
   }
 }
