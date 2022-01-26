@@ -33,7 +33,7 @@
     <vertx.version>4.2.4</vertx.version>
     <logback.version>1.2.10</logback.version>
     <log4j2.version>2.17.1</log4j2.version>
-    <slf4j.version>1.7.33</slf4j.version>
+    <slf4j.version>1.7.35</slf4j.version>
     <doc.outputDirectory>${project.build.directory}/generated-docs</doc.outputDirectory>
   </properties>
 
