@@ -18,7 +18,6 @@ package io.reactiverse.contextual.logging;
 
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
@@ -32,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +47,20 @@ public class ContextualLoggingIT extends VertxTestBase {
   private static final String REQUEST_ID_HEADER = "x-request-id";
 
   private static final Logger log = LoggerFactory.getLogger(ContextualLoggingIT.class);
+
+  private Path logFile;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    logFile = Paths.get("target", ContextualLoggingIT.class.getSimpleName() + ".log");
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    super.tearDown();
+    Files.deleteIfExists(logFile);
+  }
 
   @Test
   public void testContextualLogging() {
@@ -75,7 +89,7 @@ public class ContextualLoggingIT extends VertxTestBase {
   }
 
   private void verifyOutput(List<String> ids) throws IOException {
-    List<String> output = Files.readAllLines(Paths.get("target", ContextualLoggingIT.class.getSimpleName() + ".log"));
+    List<String> output = Files.readAllLines(logFile);
     assertEquals("foobar ### Started!", output.get(0));
     Map<String, List<String>> allMessagesById = output.stream()
       .skip(1)
@@ -105,8 +119,6 @@ public class ContextualLoggingIT extends VertxTestBase {
       WebClient webClient = WebClient.create(vertx);
       request = webClient.getAbs("http://worldclockapi.com/api/json/utc/now").as(BodyCodec.jsonObject());
 
-      Promise<HttpServer> httpServerPromise = Promise.promise();
-      httpServerPromise.future().<Void>mapEmpty().onComplete(startPromise);
       vertx.createHttpServer()
         .requestHandler(req -> {
 
@@ -118,10 +130,10 @@ public class ContextualLoggingIT extends VertxTestBase {
 
             log.info("Timer fired ### " + requestId);
 
-            vertx.executeBlocking(fut -> {
+            vertx.executeBlocking(promise -> {
 
-              fut.complete();
               log.info("Blocking task executed ### " + requestId);
+              promise.complete();
 
             }, false, bar -> {
 
@@ -135,9 +147,16 @@ public class ContextualLoggingIT extends VertxTestBase {
             });
           });
 
-        }).listen(8080, httpServerPromise);
+        }).listen(8080, lar -> {
 
-      log.info("Started!");
+          if (lar.succeeded()) {
+            log.info("Started!");
+            startPromise.complete();
+          } else {
+            startPromise.fail(lar.cause());
+          }
+
+        });
     }
   }
 }
