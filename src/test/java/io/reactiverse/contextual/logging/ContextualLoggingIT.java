@@ -54,6 +54,11 @@ public class ContextualLoggingIT extends VertxTestBase {
   public void setUp() throws Exception {
     super.setUp();
     logFile = Paths.get("target", ContextualLoggingIT.class.getSimpleName() + ".log");
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    super.tearDown();
     Files.deleteIfExists(logFile);
   }
 
