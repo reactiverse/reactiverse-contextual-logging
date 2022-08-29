@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!--
   ~ Copyright 2022 Red Hat, Inc.
   ~
@@ -13,18 +14,25 @@
   ~ License for the specific language governing permissions and limitations
   ~ under the License.
   -->
+<!DOCTYPE configuration>
 
-<configuration debug="false">
+<configuration>
 
-  <conversionRule conversionWord="vcl"
-                  converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+  <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+  <import class="ch.qos.logback.core.ConsoleAppender"/>
+  <import class="ch.qos.logback.core.FileAppender"/>
+  <import class="ch.qos.logback.core.status.NopStatusListener"/>
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"/>
+  <statusListener class="NopStatusListener"/>
 
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+  <conversionRule conversionWord="vcl" converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+
+  <appender name="STDOUT" class="ConsoleAppender"/>
+
+  <appender name="FILE" class="FileAppender">
     <file>target/ContextualLoggingIT.log</file>
     <append>false</append>
-    <encoder>
+    <encoder class="PatternLayoutEncoder">
       <pattern>%vcl{requestId:-foobar} ### %msg%n</pattern>
     </encoder>
   </appender>

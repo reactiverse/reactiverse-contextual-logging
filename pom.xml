@@ -31,9 +31,9 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vertx.version>4.3.3</vertx.version>
-    <logback.version>1.2.11</logback.version>
+    <logback.version>1.3.0</logback.version>
     <log4j2.version>2.18.0</log4j2.version>
-    <slf4j.version>1.7.36</slf4j.version>
+    <slf4j.version>2.0.0</slf4j.version>
     <doc.outputDirectory>${project.build.directory}/generated-docs</doc.outputDirectory>
   </properties>
 
@@ -87,24 +87,6 @@
       <version>${vertx.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
-      <version>${log4j2.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
@@ -151,11 +133,11 @@
                 </java.util.logging.config.file>
               </systemProperties>
               <classpathDependencyExcludes>
+                <classpathDependencyExclude>org.slf4j:slf4j-api</classpathDependencyExclude>
                 <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
                 <classpathDependencyExclude>ch.qos.logback:logback-core</classpathDependencyExclude>
                 <classpathDependencyExclude>org.apache.logging.log4j:log4j-api</classpathDependencyExclude>
                 <classpathDependencyExclude>org.apache.logging.log4j:log4j-core</classpathDependencyExclude>
-                <classpathDependencyExclude>org.apache.logging.log4j:log4j-slf4j-impl</classpathDependencyExclude>
               </classpathDependencyExcludes>
             </configuration>
           </execution>
@@ -173,9 +155,9 @@
                 <additionalClasspathElement>${basedir}/src/test/log4j2/context/resources</additionalClasspathElement>
               </additionalClasspathElements>
               <classpathDependencyExcludes>
+                <classpathDependencyExclude>org.slf4j:slf4j-api</classpathDependencyExclude>
                 <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
                 <classpathDependencyExclude>ch.qos.logback:logback-core</classpathDependencyExclude>
-                <classpathDependencyExclude>org.slf4j:slf4j-jdk14</classpathDependencyExclude>
               </classpathDependencyExcludes>
             </configuration>
           </execution>
@@ -190,9 +172,9 @@
                 <log4j2.configurationFile>${basedir}/src/test/log4j2/converter/log4j2.xml</log4j2.configurationFile>
               </systemProperties>
               <classpathDependencyExcludes>
+                <classpathDependencyExclude>org.slf4j:slf4j-api</classpathDependencyExclude>
                 <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
                 <classpathDependencyExclude>ch.qos.logback:logback-core</classpathDependencyExclude>
-                <classpathDependencyExclude>org.slf4j:slf4j-jdk14</classpathDependencyExclude>
               </classpathDependencyExcludes>
             </configuration>
           </execution>
@@ -209,8 +191,6 @@
               <classpathDependencyExcludes>
                 <classpathDependencyExclude>org.apache.logging.log4j:log4j-api</classpathDependencyExclude>
                 <classpathDependencyExclude>org.apache.logging.log4j:log4j-core</classpathDependencyExclude>
-                <classpathDependencyExclude>org.apache.logging.log4j:log4j-slf4j-impl</classpathDependencyExclude>
-                <classpathDependencyExclude>org.slf4j:slf4j-jdk14</classpathDependencyExclude>
               </classpathDependencyExcludes>
             </configuration>
           </execution>
