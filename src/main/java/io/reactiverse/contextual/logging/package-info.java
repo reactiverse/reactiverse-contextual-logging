@@ -13,6 +13,10 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
+/**
+ * Empty block comment as a workaround of https://bugs.openjdk.org/browse/JDK-8222091 and https://bugs.openjdk.org/browse/JDK-8295850
+ */
 @ModuleGen(name = "contextual-logging", groupPackage = "io.reactiverse")
 package io.reactiverse.contextual.logging;
 
