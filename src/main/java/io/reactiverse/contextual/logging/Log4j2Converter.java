@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Red Hat, Inc.
+ * Copyright 2023 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -16,7 +16,6 @@
 
 package io.reactiverse.contextual.logging;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
@@ -47,7 +46,7 @@ public class Log4j2Converter extends LogEventPatternConverter {
 
   @Override
   public void format(LogEvent event, StringBuilder toAppendTo) {
-    ContextInternal context = (ContextInternal) Vertx.currentContext();
+    ContextInternal context = ContextInternal.current();
     if (context != null && key != null) {
       toAppendTo.append(ContextualData.getOrDefault(key, defaultValue));
     } else {

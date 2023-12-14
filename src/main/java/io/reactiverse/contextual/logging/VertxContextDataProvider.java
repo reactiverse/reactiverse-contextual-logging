@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2021 Red Hat, Inc.
+ * Copyright 2023 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -18,7 +18,6 @@
 package io.reactiverse.contextual.logging;
 
 import io.reactiverse.contextual.logging.impl.ContextualDataImpl;
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import org.apache.logging.log4j.core.util.ContextDataProvider;
 
@@ -32,7 +31,7 @@ public class VertxContextDataProvider implements ContextDataProvider {
 
   @Override
   public Map<String, String> supplyContextData() {
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+    ContextInternal ctx = ContextInternal.current();
     if (ctx != null) {
       return Collections.unmodifiableMap(ContextualDataImpl.contextualDataMap(ctx));
     }

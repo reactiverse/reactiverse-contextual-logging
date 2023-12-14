@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Red Hat, Inc.
+ * Copyright 2023 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -17,10 +17,9 @@
 package io.reactiverse.contextual.logging;
 
 import io.vertx.core.*;
-import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
@@ -49,17 +48,29 @@ public class ContextualLoggingIT extends VertxTestBase {
   private static final Logger log = LoggerFactory.getLogger(ContextualLoggingIT.class);
 
   private Path logFile;
+  private WebClient webClient;
+  private HttpServer server;
 
   @Override
   public void setUp() throws Exception {
     super.setUp();
     logFile = Paths.get("target", ContextualLoggingIT.class.getSimpleName() + ".log");
+    webClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8080));
+    server = vertx.createHttpServer()
+      .requestHandler(req -> req.response().end("Hello!"));
+    server.listen(8081, "127.0.0.1").toCompletionStage().toCompletableFuture().get();
   }
 
   @Override
   protected void tearDown() throws Exception {
-    super.tearDown();
     Files.deleteIfExists(logFile);
+    if (webClient != null) {
+      webClient.close();
+    }
+    if (server != null) {
+      server.close().toCompletionStage().toCompletableFuture().get();
+    }
+    super.tearDown();
   }
 
   @Test
@@ -79,13 +90,13 @@ public class ContextualLoggingIT extends VertxTestBase {
   }
 
   private void sendRequests(List<String> ids, Handler<AsyncResult<Void>> handler) {
-    WebClient webClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8080));
-    HttpRequest<Buffer> request = webClient.get("/")
-      .expect(ResponsePredicate.SC_OK);
-    List<Future> futures = ids.stream()
-      .map(id -> request.putHeader(REQUEST_ID_HEADER, id).send())
+    List<Future<?>> futures = ids.stream()
+      .map(id -> webClient
+        .get("/")
+        .expect(ResponsePredicate.SC_OK)
+        .putHeader(REQUEST_ID_HEADER, id).send())
       .collect(toList());
-    CompositeFuture.all(futures).<Void>mapEmpty().onComplete(handler);
+    Future.all(futures).<Void>mapEmpty().onComplete(handler);
   }
 
   private void verifyOutput(List<String> ids) throws IOException {
@@ -112,12 +123,13 @@ public class ContextualLoggingIT extends VertxTestBase {
 
   private static class TestVerticle extends AbstractVerticle {
 
-    private HttpRequest<JsonObject> request;
+    private HttpRequest<String> request;
+    private WebClient webClient;
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-      WebClient webClient = WebClient.create(vertx);
-      request = webClient.getAbs("http://worldclockapi.com/api/json/utc/now").as(BodyCodec.jsonObject());
+      webClient = WebClient.create(vertx);
+      request = webClient.getAbs("http://127.0.0.1:8081").as(BodyCodec.string());
 
       vertx.createHttpServer()
         .requestHandler(req -> {
@@ -130,10 +142,10 @@ public class ContextualLoggingIT extends VertxTestBase {
 
             log.info("Timer fired ### " + requestId);
 
-            vertx.executeBlocking(promise -> {
+            vertx.executeBlocking(() -> {
 
               log.info("Blocking task executed ### " + requestId);
-              promise.complete();
+              return null;
 
             }, false, bar -> {
 
