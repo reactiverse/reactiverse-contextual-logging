@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Red Hat, Inc.
+ * Copyright 2023 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -15,12 +15,14 @@
  */
 package io.reactiverse.contextual.logging;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.logging.Formatter;
 import java.util.logging.LogManager;
@@ -167,8 +169,8 @@ public final class JULContextualDataFormatter extends Formatter {
       }
 
       // if the format fails the template is invalid. This is also the technique used in the JDK however
-      // the JDK will silently fallback to the default format in this case it makes sense to abort as the
-      // behavior would not match what the users desires.
+      // the JDK will silently fall back to the default format in this case it makes sense to abort as the
+      // behavior would not match what the users desire.
       String.format(format, args);
     } catch (RuntimeException e) {
       throw new IllegalArgumentException("format string \"" + template + "\" is not valid.");
@@ -211,7 +213,7 @@ public final class JULContextualDataFormatter extends Formatter {
   @Override
   public String format(LogRecord record) {
     final Object[] args = new Object[resolvers.size()];
-    final ContextInternal context = (ContextInternal) Vertx.currentContext();
+    final ContextInternal context = ContextInternal.current();
     // process the placeholder values
     for (int i = 0; i < args.length; i++) {
       args[i] = resolvers.get(i).apply(record, context);

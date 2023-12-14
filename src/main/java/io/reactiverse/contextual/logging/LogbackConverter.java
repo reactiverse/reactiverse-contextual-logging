@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Red Hat, Inc.
+ * Copyright 2023 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -18,7 +18,6 @@ package io.reactiverse.contextual.logging;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 
 import static ch.qos.logback.core.util.OptionHelper.extractDefaultReplacement;
@@ -52,7 +51,7 @@ public class LogbackConverter extends ClassicConverter {
 
   @Override
   public String convert(ILoggingEvent event) {
-    ContextInternal context = (ContextInternal) Vertx.currentContext();
+    ContextInternal context = ContextInternal.current();
     if (context != null && key != null) {
       return ContextualData.getOrDefault(key, defaultValue);
     }

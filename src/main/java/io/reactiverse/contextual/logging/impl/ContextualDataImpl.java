@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Red Hat, Inc.
+ * Copyright 2023 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -16,7 +16,6 @@
 
 package io.reactiverse.contextual.logging.impl;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -40,7 +39,7 @@ public class ContextualDataImpl {
   public static void put(String key, String value) {
     Objects.requireNonNull(key);
     Objects.requireNonNull(value);
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+    ContextInternal ctx = ContextInternal.current();
     if (ctx == null) {
       if (log.isTraceEnabled()) {
         log.trace("Attempt to set contextual data from a non Vert.x thread", new Exception());
@@ -58,7 +57,7 @@ public class ContextualDataImpl {
    */
   public static String get(String key) {
     Objects.requireNonNull(key);
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+    ContextInternal ctx = ContextInternal.current();
     if (ctx != null) {
       return contextualDataMap(ctx).get(key);
     }
@@ -74,7 +73,7 @@ public class ContextualDataImpl {
    */
   public static String getOrDefault(String key, String defaultValue) {
     Objects.requireNonNull(key);
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+    ContextInternal ctx = ContextInternal.current();
     if (ctx != null) {
       return contextualDataMap(ctx).getOrDefault(key, defaultValue);
     }
@@ -87,7 +86,7 @@ public class ContextualDataImpl {
    * @return the values or {@code null} if the method is invoked on a non Vert.x thread
    */
   public static Map<String, String> getAll() {
-    ContextInternal ctx = (ContextInternal) Vertx.currentContext();
+    ContextInternal ctx = ContextInternal.current();
     if (ctx != null) {
       return new HashMap<>(contextualDataMap(ctx));
     }
