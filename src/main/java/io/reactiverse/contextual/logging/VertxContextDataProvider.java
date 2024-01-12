@@ -17,24 +17,121 @@
 
 package io.reactiverse.contextual.logging;
 
-import io.reactiverse.contextual.logging.impl.ContextualDataImpl;
-import io.vertx.core.impl.ContextInternal;
 import org.apache.logging.log4j.core.util.ContextDataProvider;
+import org.apache.logging.log4j.util.BiConsumer;
+import org.apache.logging.log4j.util.ReadOnlyStringMap;
+import org.apache.logging.log4j.util.StringMap;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Supplies log4j2 log events with Vert.x Contextual Data.
  */
 public class VertxContextDataProvider implements ContextDataProvider {
 
+  private static final FrozenStringMap EMPTY_FROZEN_STRING_MAP = new FrozenStringMap(Collections.emptyMap());
+
   @Override
   public Map<String, String> supplyContextData() {
-    ContextInternal ctx = ContextInternal.current();
-    if (ctx != null) {
-      return Collections.unmodifiableMap(ContextualDataImpl.contextualDataMap(ctx));
+    Map<String, String> all = ContextualData.getAll();
+    if (all != null) {
+      return all;
     }
     return Collections.emptyMap();
+  }
+
+  @Override
+  public StringMap supplyStringMap() {
+    Map<String, String> all = ContextualData.getAll();
+    if (all != null && !all.isEmpty()) {
+      return new FrozenStringMap(all);
+    }
+    return EMPTY_FROZEN_STRING_MAP;
+  }
+
+  private static class FrozenStringMap implements StringMap {
+
+    final Map<String, String> delegate;
+
+    FrozenStringMap(Map<String, String> delegate) {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void clear() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void freeze() {
+    }
+
+    @Override
+    public boolean isFrozen() {
+      return true;
+    }
+
+    @Override
+    public void putAll(ReadOnlyStringMap source) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void putValue(String key, Object value) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void remove(String key) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, String> toMap() {
+      return new HashMap<>(delegate);
+    }
+
+    @Override
+    public boolean containsKey(String key) {
+      return delegate.containsKey(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V> void forEach(BiConsumer<String, ? super V> action) {
+      Objects.requireNonNull(action);
+      for (Map.Entry<String, String> entry : delegate.entrySet()) {
+        action.accept(entry.getKey(), (V) entry.getValue());
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V, S> void forEach(TriConsumer<String, ? super V, S> action, S state) {
+      Objects.requireNonNull(action);
+      for (Map.Entry<String, String> entry : delegate.entrySet()) {
+        action.accept(entry.getKey(), (V) entry.getValue(), state);
+      }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V> V getValue(String key) {
+      return (V) delegate.get(key);
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return delegate.isEmpty();
+    }
+
+    @Override
+    public int size() {
+      return delegate.size();
+    }
   }
 }
