@@ -20,6 +20,7 @@ import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -88,14 +89,14 @@ public class ContextualDataImpl {
   public static Map<String, String> getAll() {
     ContextInternal ctx = ContextInternal.current();
     if (ctx != null) {
-      return new HashMap<>(contextualDataMap(ctx));
+      return Collections.unmodifiableMap(new HashMap<>(contextualDataMap(ctx)));
     }
     return null;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
+  @SuppressWarnings("unchecked")
+  private static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
     ConcurrentMap<Object, Object> lcd = Objects.requireNonNull(ctx).localContextData();
-    return (ConcurrentMap) lcd.computeIfAbsent(ContextualDataImpl.class, k -> new ConcurrentHashMap());
+    return (ConcurrentMap<String, String>) lcd.computeIfAbsent(ContextualDataImpl.class, k -> new ConcurrentHashMap<>());
   }
 }
