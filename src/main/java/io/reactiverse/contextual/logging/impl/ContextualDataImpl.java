@@ -20,13 +20,12 @@ import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.BiConsumer;
-
-import static java.util.Spliterator.*;
 
 public class ContextualDataImpl {
 
@@ -90,179 +89,14 @@ public class ContextualDataImpl {
   public static Map<String, String> getAll() {
     ContextInternal ctx = ContextInternal.current();
     if (ctx != null) {
-      return immutableCopy(contextualDataMap(ctx));
+      return Collections.unmodifiableMap(new HashMap<>(contextualDataMap(ctx)));
     }
     return null;
-  }
-
-  private static Map<String, String> immutableCopy(ConcurrentMap<String, String> map) {
-    // log4j2 context data provider needs the data ordered by key.
-    // So, instead of using a hash map copy, return
-    // 1. an empty map if there are no entries
-    List<Entry<String, String>> entries = new ArrayList<>(map.entrySet());
-    if (entries.isEmpty()) {
-      return Collections.emptyMap();
-    }
-    // 2. a singleton map (obviously ordered!) if there is a single entry
-    if (entries.size() == 1) {
-      Entry<String, String> entry = entries.get(0);
-      return Collections.singletonMap(entry.getKey(), entry.getValue());
-    }
-    // 3. a map backed by an ordered list if there are several entries
-    // In most cases, it should be faster to use such a map instead of a hash map.
-    // Indeed, usually there are few entries and traversing a small list is relatively cheap.
-    entries.sort(Entry.comparingByKey());
-    return new ImmutableMap(entries);
   }
 
   @SuppressWarnings("unchecked")
   private static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
     ConcurrentMap<Object, Object> lcd = Objects.requireNonNull(ctx).localContextData();
     return (ConcurrentMap<String, String>) lcd.computeIfAbsent(ContextualDataImpl.class, k -> new ConcurrentHashMap<>());
-  }
-
-  private static class ImmutableMap extends AbstractMap<String, String> {
-
-    final List<Entry<String, String>> entries;
-
-    ImmutableMap(List<Entry<String, String>> entries) {
-      this.entries = entries;
-    }
-
-    @Override
-    public int size() {
-      return entries.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return entries.isEmpty();
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-      for (Entry<String, String> entry : entries) {
-        if (entry.getValue().equals(value)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-      for (Entry<String, String> entry : entries) {
-        if (entry.getKey().equals(key)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    @Override
-    public String get(Object key) {
-      for (Entry<String, String> entry : entries) {
-        if (entry.getKey().equals(key)) {
-          return entry.getKey();
-        }
-      }
-      return null;
-    }
-
-    @Override
-    public Set<String> keySet() {
-      return new AbstractSet<String>() {
-        @Override
-        public Iterator<String> iterator() {
-          Iterator<Entry<String, String>> iterator = entries.iterator();
-          return new Iterator<String>() {
-            @Override
-            public boolean hasNext() {
-              return iterator.hasNext();
-            }
-
-            @Override
-            public String next() {
-              return iterator.next().getKey();
-            }
-          };
-        }
-
-        @Override
-        public int size() {
-          return entries.size();
-        }
-      };
-    }
-
-    @Override
-    public Collection<String> values() {
-      return new AbstractList<String>() {
-        @Override
-        public String get(int index) {
-          return entries.get(index).getValue();
-        }
-
-        @Override
-        public int size() {
-          return entries.size();
-        }
-      };
-    }
-
-    @Override
-    public Set<Entry<String, String>> entrySet() {
-      return new ImmutableMapEntrySet(entries);
-    }
-
-    @Override
-    public void forEach(BiConsumer<? super String, ? super String> action) {
-      Objects.requireNonNull(action);
-      for (Entry<String, String> entry : entries) {
-        action.accept(entry.getKey(), entry.getValue());
-      }
-    }
-  }
-
-  private static class ImmutableMapEntrySet extends AbstractSet<Entry<String, String>> {
-
-    final List<Entry<String, String>> entries;
-
-    ImmutableMapEntrySet(final List<Entry<String, String>> entries) {
-      this.entries = entries;
-    }
-
-    @Override
-    public Iterator<Entry<String, String>> iterator() {
-      return entries.iterator();
-    }
-
-    @Override
-    public Spliterator<Entry<String, String>> spliterator() {
-      return Spliterators.spliterator(iterator(), size(), ORDERED | IMMUTABLE | SIZED | NONNULL | DISTINCT);
-    }
-
-    @Override
-    public int size() {
-      return entries.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-      return entries.isEmpty();
-    }
-
-    @Override
-    public boolean contains(Object o) {
-      if (o == null) {
-        return false;
-      }
-      for (Entry<String, String> entry : entries) {
-        if (entry.equals(o)) {
-          return true;
-        }
-      }
-      return false;
-    }
   }
 }
