@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        jdk: [8,11,17]
+        jdk: [ 11,17,21 ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: 8
+          java-version: 11
           server-id: ossrh
           server-username: SONATYPE_NEXUS_USERNAME
           server-password: SONATYPE_NEXUS_PASSWORD
@@ -64,7 +64,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: 8
+          java-version: 11
           server-id: ossrh
           server-username: SONATYPE_NEXUS_USERNAME
           server-password: SONATYPE_NEXUS_PASSWORD
