@@ -75,7 +75,7 @@ public class ContextualLoggingIT extends VertxTestBase {
 
   @Test
   public void testContextualLogging() {
-    vertx.deployVerticle(new TestVerticle(), onSuccess(id -> {
+    vertx.deployVerticle(new TestVerticle()).onComplete(onSuccess(id -> {
       List<String> ids = IntStream.range(0, 10).mapToObj(i -> UUID.randomUUID().toString()).collect(toList());
       sendRequests(ids, onSuccess(v -> {
         try {
@@ -147,9 +147,9 @@ public class ContextualLoggingIT extends VertxTestBase {
               log.info("Blocking task executed ### " + requestId);
               return null;
 
-            }, false, bar -> {
+            }, false).onComplete(bar -> {
 
-              request.send(rar -> {
+              request.send().onComplete(rar -> {
 
                 log.info("Received Web Client response ### " + requestId);
                 req.response().end();
@@ -159,7 +159,7 @@ public class ContextualLoggingIT extends VertxTestBase {
             });
           });
 
-        }).listen(8080, lar -> {
+        }).listen(8080).onComplete(lar -> {
 
           if (lar.succeeded()) {
             log.info("Started!");
