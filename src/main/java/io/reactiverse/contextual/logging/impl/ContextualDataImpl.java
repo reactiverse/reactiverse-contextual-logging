@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Red Hat, Inc.
+ * Copyright 2024 Red Hat, Inc.
  *
  * Red Hat licenses this file to you under the Apache License, version 2.0
  * (the "License"); you may not use this file except in compliance with the
@@ -16,9 +16,9 @@
 
 package io.reactiverse.contextual.logging.impl;
 
-import io.vertx.core.impl.ContextInternal;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.ContextInternal;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static io.reactiverse.contextual.logging.impl.ContextualDataStorage.CONTEXTUAL_DATA_KEY;
+import static io.vertx.core.spi.context.storage.AccessMode.CONCURRENT;
 
 public class ContextualDataImpl {
 
@@ -94,9 +97,9 @@ public class ContextualDataImpl {
     return null;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private static ConcurrentMap<String, String> contextualDataMap(ContextInternal ctx) {
-    ConcurrentMap<Object, Object> lcd = Objects.requireNonNull(ctx).localContextData();
-    return (ConcurrentMap<String, String>) lcd.computeIfAbsent(ContextualDataImpl.class, k -> new ConcurrentHashMap<>());
+    ConcurrentMap lcd = Objects.requireNonNull(ctx).getLocal(CONTEXTUAL_DATA_KEY, CONCURRENT, ConcurrentHashMap::new);
+    return (ConcurrentMap<String, String>) lcd;
   }
 }

@@ -15,7 +15,7 @@
  */
 package io.reactiverse.contextual.logging;
 
-import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.internal.ContextInternal;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -32,7 +32,7 @@ import java.util.logging.LogRecord;
  * JUL Formatted that is able to process Vert.x Context data. Besides the format used in the parent class,
  * vert.x context variables can be referred by name too. For simplicity the default variables are also exposed
  * by name and cannot be overridden.
- *
+ * <p>
  * {@inheritDoc}
  * @author Paulo Lopes
  */

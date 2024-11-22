@@ -18,7 +18,7 @@ package io.reactiverse.contextual.logging;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import io.vertx.core.impl.ContextInternal;
+import io.vertx.core.internal.ContextInternal;
 
 import static ch.qos.logback.core.util.OptionHelper.extractDefaultReplacement;
 

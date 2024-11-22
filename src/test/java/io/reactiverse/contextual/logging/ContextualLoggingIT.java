@@ -17,13 +17,13 @@
 package io.reactiverse.contextual.logging;
 
 import io.vertx.core.*;
+import io.vertx.core.http.HttpResponseExpectation;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -75,7 +75,7 @@ public class ContextualLoggingIT extends VertxTestBase {
 
   @Test
   public void testContextualLogging() {
-    vertx.deployVerticle(new TestVerticle(), onSuccess(id -> {
+    vertx.deployVerticle(new TestVerticle()).onComplete(onSuccess(id -> {
       List<String> ids = IntStream.range(0, 10).mapToObj(i -> UUID.randomUUID().toString()).collect(toList());
       sendRequests(ids, onSuccess(v -> {
         try {
@@ -93,8 +93,9 @@ public class ContextualLoggingIT extends VertxTestBase {
     List<Future<?>> futures = ids.stream()
       .map(id -> webClient
         .get("/")
-        .expect(ResponsePredicate.SC_OK)
-        .putHeader(REQUEST_ID_HEADER, id).send())
+        .putHeader(REQUEST_ID_HEADER, id)
+        .send()
+        .expecting(HttpResponseExpectation.SC_OK))
       .collect(toList());
     Future.all(futures).<Void>mapEmpty().onComplete(handler);
   }
@@ -147,9 +148,9 @@ public class ContextualLoggingIT extends VertxTestBase {
               log.info("Blocking task executed ### " + requestId);
               return null;
 
-            }, false, bar -> {
+            }, false).onComplete(bar -> {
 
-              request.send(rar -> {
+              request.send().onComplete(rar -> {
 
                 log.info("Received Web Client response ### " + requestId);
                 req.response().end();
@@ -159,7 +160,7 @@ public class ContextualLoggingIT extends VertxTestBase {
             });
           });
 
-        }).listen(8080, lar -> {
+        }).listen(8080).onComplete(lar -> {
 
           if (lar.succeeded()) {
             log.info("Started!");
