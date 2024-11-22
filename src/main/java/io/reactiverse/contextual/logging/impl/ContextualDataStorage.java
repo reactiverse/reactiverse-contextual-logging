@@ -16,7 +16,7 @@
 
 package io.reactiverse.contextual.logging.impl;
 
-import io.vertx.core.impl.VertxBuilder;
+import io.vertx.core.internal.VertxBootstrap;
 import io.vertx.core.spi.VertxServiceProvider;
 import io.vertx.core.spi.context.storage.ContextLocal;
 
@@ -31,6 +31,6 @@ public class ContextualDataStorage implements VertxServiceProvider {
   static ContextLocal<ConcurrentMap> CONTEXTUAL_DATA_KEY = ContextLocal.registerLocal(ConcurrentMap.class);
 
   @Override
-  public void init(VertxBuilder builder) {
+  public void init(VertxBootstrap builder) {
   }
 }

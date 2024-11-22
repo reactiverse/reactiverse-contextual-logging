@@ -17,13 +17,13 @@
 package io.reactiverse.contextual.logging;
 
 import io.vertx.core.*;
+import io.vertx.core.http.HttpResponseExpectation;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -93,8 +93,9 @@ public class ContextualLoggingIT extends VertxTestBase {
     List<Future<?>> futures = ids.stream()
       .map(id -> webClient
         .get("/")
-        .expect(ResponsePredicate.SC_OK)
-        .putHeader(REQUEST_ID_HEADER, id).send())
+        .putHeader(REQUEST_ID_HEADER, id)
+        .send()
+        .expecting(HttpResponseExpectation.SC_OK))
       .collect(toList());
     Future.all(futures).<Void>mapEmpty().onComplete(handler);
   }

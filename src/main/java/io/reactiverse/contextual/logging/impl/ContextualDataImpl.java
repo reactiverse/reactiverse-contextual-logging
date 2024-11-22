@@ -16,9 +16,9 @@
 
 package io.reactiverse.contextual.logging.impl;
 
-import io.vertx.core.impl.ContextInternal;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.ContextInternal;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
