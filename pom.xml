@@ -14,14 +14,15 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.reactiverse</groupId>
-  <artifactId>reactiverse-contextual-logging</artifactId>
+  <artifactId>reactiverse-contextual-logging-parent</artifactId>
   <version>2.0.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>Contextual logging for Vert.x applications.</description>
@@ -29,225 +30,122 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!--    Remove this and dep management trick below for netty-handler when upgrading to the next Vert.x 5 release -->
+    <netty.version>4.2.0.Beta1</netty.version>
     <vertx.version>5.0.0.CR2</vertx.version>
-    <logback.version>1.4.14</logback.version>
-    <log4j2.version>2.24.2</log4j2.version>
-    <slf4j.version>2.0.0</slf4j.version>
-    <doc.outputDirectory>${project.build.directory}/generated-docs</doc.outputDirectory>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-      <version>${vertx.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <version>${vertx.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <classifier>processor</classifier>
-      <version>${vertx.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>${logback.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>${log4j2.version}</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-      <version>${vertx.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-web-client</artifactId>
-      <version>${vertx.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <modules>
+    <module>api</module>
+    <module>jul</module>
+    <module>log4j2</module>
+    <module>logback</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-core</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-codegen</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-handler</artifactId>
+        <version>${netty.version}</version>
+        <!-- Make sure we don't depend on those jars, because they depend on protobuf/marshalling jars we do not need -->
+        <exclusions>
+          <exclusion>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-protobuf</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-marshalling</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.2</version>
+      </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-core</artifactId>
+        <version>${vertx.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-web-client</artifactId>
+        <version>${vertx.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
-        <configuration>
-          <release>11</release>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.asciidoctor</groupId>
-        <artifactId>asciidoctor-maven-plugin</artifactId>
-        <version>2.2.6</version>
-        <configuration>
-          <attributes>
-            <group-id>${project.groupId}</group-id>
-            <artifact-id>${project.artifactId}</artifact-id>
-            <version>${project.version}</version>
-          </attributes>
-          <outputDirectory>${doc.outputDirectory}</outputDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>output-html</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>process-asciidoc</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.5.2</version>
-        <configuration>
-          <useModulePath>false</useModulePath>
-        </configuration>
-        <executions>
-          <execution>
-            <id>jul</id>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <systemProperties>
-                <java.util.logging.config.file>${basedir}/src/test/jul/logging.properties
-                </java.util.logging.config.file>
-              </systemProperties>
-              <classpathDependencyExcludes>
-                <classpathDependencyExclude>org.slf4j:slf4j-api</classpathDependencyExclude>
-                <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
-                <classpathDependencyExclude>ch.qos.logback:logback-core</classpathDependencyExclude>
-                <classpathDependencyExclude>org.apache.logging.log4j:log4j-api</classpathDependencyExclude>
-                <classpathDependencyExclude>org.apache.logging.log4j:log4j-core</classpathDependencyExclude>
-              </classpathDependencyExcludes>
-            </configuration>
-          </execution>
-          <execution>
-            <id>log4j2-context</id>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <systemProperties>
-                <log4j2.configurationFile>${basedir}/src/test/log4j2/context/log4j2.xml</log4j2.configurationFile>
-              </systemProperties>
-              <additionalClasspathElements>
-                <additionalClasspathElement>${basedir}/src/test/log4j2/context/resources</additionalClasspathElement>
-              </additionalClasspathElements>
-              <classpathDependencyExcludes>
-                <classpathDependencyExclude>org.slf4j:slf4j-api</classpathDependencyExclude>
-                <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
-                <classpathDependencyExclude>ch.qos.logback:logback-core</classpathDependencyExclude>
-              </classpathDependencyExcludes>
-            </configuration>
-          </execution>
-          <execution>
-            <id>log4j2-converter</id>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <systemProperties>
-                <log4j2.configurationFile>${basedir}/src/test/log4j2/converter/log4j2.xml</log4j2.configurationFile>
-              </systemProperties>
-              <classpathDependencyExcludes>
-                <classpathDependencyExclude>org.slf4j:slf4j-api</classpathDependencyExclude>
-                <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
-                <classpathDependencyExclude>ch.qos.logback:logback-core</classpathDependencyExclude>
-              </classpathDependencyExcludes>
-            </configuration>
-          </execution>
-          <execution>
-            <id>logback</id>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-            <configuration>
-              <systemProperties>
-                <logback.configurationFile>${basedir}/src/test/logback/logback.xml</logback.configurationFile>
-              </systemProperties>
-              <classpathDependencyExcludes>
-                <classpathDependencyExclude>org.apache.logging.log4j:log4j-api</classpathDependencyExclude>
-                <classpathDependencyExclude>org.apache.logging.log4j:log4j-core</classpathDependencyExclude>
-              </classpathDependencyExcludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.4.2</version>
-        <configuration>
-          <excludes>
-            <exclude>examples/**</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>3.3.1</version>
-        <configuration>
-          <excludes>
-            <exclude>examples/**</exclude>
-          </excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.11.1</version>
-        <configuration>
-          <excludePackageNames>examples</excludePackageNames>
-        </configuration>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.13.0</version>
+          <configuration>
+            <release>11</release>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>3.5.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.4.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.3.1</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.11.1</version>
+          <configuration>
+            <excludePackageNames>examples</excludePackageNames>
+          </configuration>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>3.2.7</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <profiles>
@@ -256,9 +154,7 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.2.7</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

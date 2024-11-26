@@ -1,0 +1,375 @@
+= Contextual logging for Eclipse Vert.x
+:examplesdir: ../../main/java/examples
+:source-highlighter: highlight.js
+:artifact-id: Unknown
+:version: Unknown
+:revnumber: {version}
+:revdate: {localdate}
+:description: Mapped Diagnostic Context (MDC) that works with the Vert.x event-loop model
+:keywords: Vert.x, MDC, logging
+:nofooter:
+:toc: left
+:toclevels: 4
+
+== Purpose
+
+In web application logs, messages come from different users and requests.
+When a problem occurs, it can be difficult to determine which ones are related to the issue, especially under load.
+
+In traditional Java development models (e.g. Spring or Jakarta EE), the server implements a _one thread per request_ design.
+As a consequence, it is possible to store contextual data in `ThreadLocal` variables and use it when logging.
+Both https://logback.qos.ch/manual/mdc.html[`logback`] and https://logging.apache.org/log4j/2.x/manual/thread-context.html[`log4j2`] name this _Mapped Diagnostic Context_ (MDC).
+
+Vert.x implements http://vertx.io/docs/vertx-core/java/#_reactor_and_multi_reactor[the reactor pattern].
+In practice, this means many concurrent requests can be handled by the same thread, thus preventing usage of ``ThreadLocal``s to store contextual data.
+
+This project uses an alternative storage method for contextual data and makes it possible to have MDC logging in Vert.x applications.
+
+== Supported logging libraries
+
+* Logback
+* Log4j2
+* JUL
+
+== How it works
+
+Vert.x 4.0 introduced a Tracing SPI.
+To transport distributed traces information, a new `localContext` data map is attached to standard and worker contexts.
+
+This library:
+
+* uses the `localContext` data map to store contextual data
+* implements logging extensions that retrieve contextual data from the `localContext` data map
+
+== Usage
+
+[#_logback]
+=== Logback
+
+==== Dependency setup
+
+===== Maven
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>{group-id}</groupId>
+  <artifactId>{artifact-id}-logback</artifactId>
+  <version>{version}</version>
+</dependency>
+----
+
+===== Gradle Kotlin DSL
+
+[source,kotlin,subs="attributes+"]
+----
+implementation("{group-id}:{artifact-id}-logback:{version}")
+----
+
+===== Gradle Groovy DSL
+
+[source,groovy,subs="attributes+"]
+----
+implementation '{group-id}:{artifact-id}-logback:{version}'
+----
+
+==== Configuration
+
+Declare the converter class and assign it a conversion word:
+
+[source,xml]
+----
+<conversionRule conversionWord="vcl"
+                converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+----
+
+Then use the conversion word in conversion patterns:
+
+[source,xml]
+----
+<pattern>%d{HH:mm:ss.SSS} [%thread] [%vcl{requestId}] %-5level %logger{36} - %msg%n</pattern>
+----
+
+In the example above, the `requestId` will be added to the logs.
+
+A default value can be provided:
+
+----
+%vcl{requestId:-foobar}
+----
+
+In this case, `foobar` will be added to the logs if:
+
+* the `requestId` is missing in contextual data, or
+* the logger is used on a non Vert.x thread.
+
+Below is a sample Logback configuration:
+
+[source,xml]
+----
+<configuration>
+
+  <conversionRule conversionWord="vcl"
+                  converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] [%vcl{requestId}] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+  </root>
+
+</configuration>
+----
+
+[#_log4j2]
+=== Log4j2
+
+==== Dependency setup
+
+===== Maven
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>{group-id}</groupId>
+  <artifactId>{artifact-id}-log4j2</artifactId>
+  <version>{version}</version>
+</dependency>
+----
+
+===== Gradle Kotlin DSL
+
+[source,kotlin,subs="attributes+"]
+----
+implementation("{group-id}:{artifact-id}-log4j2:{version}")
+----
+
+===== Gradle Groovy DSL
+
+[source,groovy,subs="attributes+"]
+----
+implementation '{group-id}:{artifact-id}-log4j2:{version}'
+----
+
+==== Configuration
+
+With Log4j2, you can either use:
+
+* the xref:log4j2_pattern_converter[pattern converter], or
+* the xref:log4j2_context_data_provider[context data provider].
+
+[#log4j2_pattern_converter]
+===== Pattern Converter
+
+The Log4j2 pattern converter is configured automatically.
+It works like the Logback converter, except the conversion word is fixed to `vcl`.
+
+Below is a sample Log4j2 configuration:
+
+[source,xml]
+----
+<Configuration status="INFO">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout>
+        <pattern>%d{HH:mm:ss.SSS} [%thread] [%vcl{requestId}] %-5level %logger{36} - %msg%n</pattern>
+      </PatternLayout>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="INFO">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+</Configuration>
+----
+
+[#log4j2_context_data_provider]
+===== Context Data Provider
+
+The context data provider supplies log4j2 logging events with contextual data.
+The data can then be retrieved using https://logging.apache.org/log4j/2.x/manual/lookups.html#ContextMapLookup[context map lookups].
+
+To enable the provider, create a `META-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider` file with this content:
+
+----
+io.reactiverse.contextual.logging.log4j.impl.VertxContextDataProvider
+----
+
+===== Comparison
+
+The pattern converter:
+
+* can only be used in https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout[pattern layouts]
+* is only invoked if the appender actually writes event data to the destination
+
+The context data provider:
+
+* can be used anywhere log4j2 supports https://logging.apache.org/log4j/2.x/manual/lookups.html#ContextMapLookup[context map lookups] (e.g. https://logging.apache.org/log4j/2.x/manual/layouts.html#JSONLayout[JSON layout])
+* is invoked anytime log4j creates a logging event
+
+[#_jul]
+=== JUL
+
+==== Dependency setup
+
+===== Maven
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+  <groupId>{group-id}</groupId>
+  <artifactId>{artifact-id}-jul</artifactId>
+  <version>{version}</version>
+</dependency>
+----
+
+===== Gradle Kotlin DSL
+
+[source,kotlin,subs="attributes+"]
+----
+implementation("{group-id}:{artifact-id}-jul:{version}")
+----
+
+===== Gradle Groovy DSL
+
+[source,groovy,subs="attributes+"]
+----
+implementation '{group-id}:{artifact-id}-jul:{version}'
+----
+
+==== Configuration
+
+With JUL, the converter is a https://docs.oracle.com/javase/8/docs/api/java/util/Formatter.html#syntax[formatter] that follows the `SimpleFormatter` implementation.
+JUL parameters are located by index, not name, however this formatter allows referring to them by name using the extended format:
+
+----
+%{nameOfVariable}
+----
+
+Be aware that JUL reserves the following variable names:
+
+* date
+* source
+* logger
+* level
+* message
+* thrown
+
+Optionally a default value is allowed to be given using the `:-` suffix:
+
+----
+%{nameOfVariable:-defaultValue}
+----
+
+In order to format the value itself, follow the standard formatter rules, for example to format as `String`:
+
+----
+%{nameOfVariable:-defaultValue}$s
+----
+
+To add it to any kind of `Handler` just specify the class `JULContextualDataFormatter` as the handler `Formatter`.
+
+[source,properties]
+----
+handlers=java.util.logging.ConsoleHandler
+java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.jul.JULContextualDataFormatter
+io.reactiverse.contextual.logging.jul.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"
+----
+
+=== Saving values in the contextual data map
+
+Import the `io.reactiverse.contextual.logging.ContextualData` class.
+
+In the server implementation, store contextual data when the request is received:
+
+[source,java, indent=0]
+----
+include::{examplesdir}/ContextualDataExamples.java[tag=initial]
+----
+
+In Vert.x Web applications, it is possible to create a catch-all route for this and add it at the top of the router setup.
+
+=== Propagation
+
+Contextual data is restored when asynchronous result handlers are invoked.
+For example, it is restored when using the Vert.x:
+
+* Web Client
+* Mongo Client
+* Cassandra Client
+* SQL Clients (PostgreSQL, MySQL)
+* ... etc
+
+It's also restored when a timer fires or when a task is submitted to `executeBlocking` or completes.
+
+However, contextual data is not propagated over the `EventBus`.
+In this case, it must be:
+
+* added to message headers on the sender side
+* retrieved from headers and saved again on the receiver side
+
+This process can be automated with `EventBus` interceptors:
+
+[source,java,indent=0]
+----
+include::{examplesdir}/ContextualDataExamples.java[tag=eventBusInterceptors]
+----
+
+== Migrating from version 1
+
+Some breaking changes were necessary to support the Java Platform Module System (JPMS).
+
+=== Artifacts
+
+In version 2, there's an artifact per supported logging framework:
+
+* `{artifact-id}-logback`, for <<_logback,Logback>>
+* `{artifact-id}-log4j2`, for <<_log4j2,Log4j2>>
+* `{artifact-id}-jul`, for <<_jul,JUL>>
+
+These three artifacts depend on a common module, `{artifact-id}-api`.
+
+=== Configuration of the log4j2 `ContextDataProvider`
+
+In classpath mode, to enable the `ContextDataProvider`, create a `META-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider` file with this content:
+
+----
+io.reactiverse.contextual.logging.log4j.impl.VertxContextDataProvider
+----
+
+Instead of:
+
+----
+io.reactiverse.contextual.logging.VertxContextDataProvider
+----
+
+=== Configuration of JUL
+
+The JUL formatter class has been moved to `io.reactiverse.contextual.logging.jul.JULContextualDataFormatter`.
+
+For example, use this configuration:
+
+[source,properties]
+----
+handlers=java.util.logging.ConsoleHandler
+java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.JULContextualDataFormatter
+io.reactiverse.contextual.logging.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"
+----
+
+Instead of:
+
+[source,properties]
+----
+handlers=java.util.logging.ConsoleHandler
+java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.jul.JULContextualDataFormatter
+io.reactiverse.contextual.logging.jul.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"
+----
+
+== License
+
+Apache License version 2.0.
