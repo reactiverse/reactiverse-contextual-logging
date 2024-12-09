@@ -440,8 +440,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>Contextual logging for Eclipse Vert.x</h1>
 <div class="details">
-<span id="revnumber">version 1.2.1,</span>
-<span id="revdate">2024-01-18</span>
+<span id="revnumber">version 2.0.0.CR1,</span>
+<span id="revdate">2024-12-09</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -449,30 +449,59 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_purpose">Purpose</a></li>
 <li><a href="#_supported_logging_libraries">Supported logging libraries</a></li>
 <li><a href="#_how_it_works">How it works</a></li>
-<li><a href="#_dependency_setup">Dependency setup</a>
+<li><a href="#_usage">Usage</a>
 <ul class="sectlevel2">
+<li><a href="#_logback">Logback</a>
+<ul class="sectlevel3">
+<li><a href="#_dependency_setup">Dependency setup</a>
+<ul class="sectlevel4">
 <li><a href="#_maven">Maven</a></li>
 <li><a href="#_gradle_kotlin_dsl">Gradle Kotlin DSL</a></li>
 <li><a href="#_gradle_groovy_dsl">Gradle Groovy DSL</a></li>
 </ul>
 </li>
-<li><a href="#_usage">Usage</a>
-<ul class="sectlevel2">
-<li><a href="#_configuration">Configuration</a>
-<ul class="sectlevel3">
-<li><a href="#_logback">Logback</a></li>
+<li><a href="#_configuration">Configuration</a></li>
+</ul>
+</li>
 <li><a href="#_log4j2">Log4j2</a>
+<ul class="sectlevel3">
+<li><a href="#_dependency_setup_2">Dependency setup</a>
+<ul class="sectlevel4">
+<li><a href="#_maven_2">Maven</a></li>
+<li><a href="#_gradle_kotlin_dsl_2">Gradle Kotlin DSL</a></li>
+<li><a href="#_gradle_groovy_dsl_2">Gradle Groovy DSL</a></li>
+</ul>
+</li>
+<li><a href="#_configuration_2">Configuration</a>
 <ul class="sectlevel4">
 <li><a href="#log4j2_pattern_converter">Pattern Converter</a></li>
 <li><a href="#log4j2_context_data_provider">Context Data Provider</a></li>
 <li><a href="#_comparison">Comparison</a></li>
 </ul>
 </li>
-<li><a href="#_jul">JUL</a></li>
+</ul>
+</li>
+<li><a href="#_jul">JUL</a>
+<ul class="sectlevel3">
+<li><a href="#_dependency_setup_3">Dependency setup</a>
+<ul class="sectlevel4">
+<li><a href="#_maven_3">Maven</a></li>
+<li><a href="#_gradle_kotlin_dsl_3">Gradle Kotlin DSL</a></li>
+<li><a href="#_gradle_groovy_dsl_3">Gradle Groovy DSL</a></li>
+</ul>
+</li>
+<li><a href="#_configuration_3">Configuration</a></li>
 </ul>
 </li>
 <li><a href="#_saving_values_in_the_contextual_data_map">Saving values in the contextual data map</a></li>
 <li><a href="#_propagation">Propagation</a></li>
+</ul>
+</li>
+<li><a href="#_migrating_from_version_1">Migrating from version 1</a>
+<ul class="sectlevel2">
+<li><a href="#_artifacts">Artifacts</a></li>
+<li><a href="#_configuration_of_the_log4j2_contextdataprovider">Configuration of the log4j2 <code>ContextDataProvider</code></a></li>
+<li><a href="#_configuration_of_jul">Configuration of JUL</a></li>
 </ul>
 </li>
 <li><a href="#_license">License</a></li>
@@ -488,7 +517,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 When a problem occurs, it can be difficult to determine which ones are related to the issue, especially under load.</p>
 </div>
 <div class="paragraph">
-<p>In traditional Java development models (e.g. Spring or Java EE), the server implements a <em>one thread per request</em> design.
+<p>In traditional Java development models (e.g. Spring or Jakarta EE), the server implements a <em>one thread per request</em> design.
 As a consequence, it is possible to store contextual data in <code>ThreadLocal</code> variables and use it when logging.
 Both <a href="https://logback.qos.ch/manual/mdc.html"><code>logback</code></a> and <a href="https://logging.apache.org/log4j/2.x/manual/thread-context.html"><code>log4j2</code></a> name this <em>Mapped Diagnostic Context</em> (MDC).</p>
 </div>
@@ -542,45 +571,43 @@ To transport distributed traces information, a new <code>localContext</code> dat
 </div>
 </div>
 <div class="sect1">
-<h2 id="_dependency_setup">Dependency setup</h2>
+<h2 id="_usage">Usage</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_maven">Maven</h3>
+<h3 id="_logback">Logback</h3>
+<div class="sect3">
+<h4 id="_dependency_setup">Dependency setup</h4>
+<div class="sect4">
+<h5 id="_maven">Maven</h5>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;io.reactiverse&lt;/groupId&gt;
-  &lt;artifactId&gt;reactiverse-contextual-logging&lt;/artifactId&gt;
-  &lt;version&gt;1.2.1&lt;/version&gt;
+  &lt;artifactId&gt;reactiverse-contextual-logging-logback&lt;/artifactId&gt;
+  &lt;version&gt;2.0.0.CR1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_gradle_kotlin_dsl">Gradle Kotlin DSL</h3>
+<div class="sect4">
+<h5 id="_gradle_kotlin_dsl">Gradle Kotlin DSL</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">implementation("io.reactiverse:reactiverse-contextual-logging:1.2.1")</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">implementation("io.reactiverse:reactiverse-contextual-logging-logback:2.0.0.CR1")</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_gradle_groovy_dsl">Gradle Groovy DSL</h3>
+<div class="sect4">
+<h5 id="_gradle_groovy_dsl">Gradle Groovy DSL</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">implementation 'io.reactiverse:reactiverse-contextual-logging:1.2.1'</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">implementation 'io.reactiverse:reactiverse-contextual-logging-logback:2.0.0.CR1'</code></pre>
 </div>
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_usage">Usage</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_configuration">Configuration</h3>
 <div class="sect3">
-<h4 id="_logback">Logback</h4>
+<h4 id="_configuration">Configuration</h4>
 <div class="paragraph">
 <p>Declare the converter class and assign it a conversion word:</p>
 </div>
@@ -646,8 +673,42 @@ To transport distributed traces information, a new <code>localContext</code> dat
 </div>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_log4j2">Log4j2</h3>
 <div class="sect3">
-<h4 id="_log4j2">Log4j2</h4>
+<h4 id="_dependency_setup_2">Dependency setup</h4>
+<div class="sect4">
+<h5 id="_maven_2">Maven</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;io.reactiverse&lt;/groupId&gt;
+  &lt;artifactId&gt;reactiverse-contextual-logging-log4j2&lt;/artifactId&gt;
+  &lt;version&gt;2.0.0.CR1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_gradle_kotlin_dsl_2">Gradle Kotlin DSL</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">implementation("io.reactiverse:reactiverse-contextual-logging-log4j2:2.0.0.CR1")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_gradle_groovy_dsl_2">Gradle Groovy DSL</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">implementation 'io.reactiverse:reactiverse-contextual-logging-log4j2:2.0.0.CR1'</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuration_2">Configuration</h4>
 <div class="paragraph">
 <p>With Log4j2, you can either use:</p>
 </div>
@@ -696,11 +757,11 @@ It works like the Logback converter, except the conversion word is fixed to <cod
 The data can then be retrieved using <a href="https://logging.apache.org/log4j/2.x/manual/lookups.html#ContextMapLookup">context map lookups</a>.</p>
 </div>
 <div class="paragraph">
-<p>To enable the provider, create a <code>META-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider</code> file which this content:</p>
+<p>To enable the provider, create a <code>META-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider</code> file with this content:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>io.reactiverse.contextual.logging.VertxContextDataProvider</pre>
+<pre>io.reactiverse.contextual.logging.log4j.impl.VertxContextDataProvider</pre>
 </div>
 </div>
 </div>
@@ -734,8 +795,42 @@ The data can then be retrieved using <a href="https://logging.apache.org/log4j/2
 </div>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_jul">JUL</h3>
 <div class="sect3">
-<h4 id="_jul">JUL</h4>
+<h4 id="_dependency_setup_3">Dependency setup</h4>
+<div class="sect4">
+<h5 id="_maven_3">Maven</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+  &lt;groupId&gt;io.reactiverse&lt;/groupId&gt;
+  &lt;artifactId&gt;reactiverse-contextual-logging-jul&lt;/artifactId&gt;
+  &lt;version&gt;2.0.0.CR1&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_gradle_kotlin_dsl_3">Gradle Kotlin DSL</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">implementation("io.reactiverse:reactiverse-contextual-logging-jul:2.0.0.CR1")</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_gradle_groovy_dsl_3">Gradle Groovy DSL</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">implementation 'io.reactiverse:reactiverse-contextual-logging-jul:2.0.0.CR1'</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuration_3">Configuration</h4>
 <div class="paragraph">
 <p>With JUL, the converter is a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Formatter.html#syntax">formatter</a> that follows the <code>SimpleFormatter</code> implementation.
 JUL parameters are located by index, not name, however this formatter allows referring to them by name using the extended format:</p>
@@ -792,8 +887,8 @@ JUL parameters are located by index, not name, however this formatter allows ref
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">handlers=java.util.logging.ConsoleHandler
-java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.JULContextualDataFormatter
-io.reactiverse.contextual.logging.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"</code></pre>
+java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.jul.JULContextualDataFormatter
+io.reactiverse.contextual.logging.jul.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"</code></pre>
 </div>
 </div>
 </div>
@@ -893,6 +988,81 @@ vertx.eventBus().addInboundInterceptor(event -&gt; {
   }
   event.next();
 });</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_migrating_from_version_1">Migrating from version 1</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Some breaking changes were necessary to support the Java Platform Module System (JPMS).</p>
+</div>
+<div class="sect2">
+<h3 id="_artifacts">Artifacts</h3>
+<div class="paragraph">
+<p>In version 2, there&#8217;s an artifact per supported logging framework:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>reactiverse-contextual-logging-logback</code>, for <a href="#_logback">Logback</a></p>
+</li>
+<li>
+<p><code>reactiverse-contextual-logging-log4j2</code>, for <a href="#_log4j2">Log4j2</a></p>
+</li>
+<li>
+<p><code>reactiverse-contextual-logging-jul</code>, for <a href="#_jul">JUL</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These three artifacts depend on a common module, <code>reactiverse-contextual-logging-api</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_of_the_log4j2_contextdataprovider">Configuration of the log4j2 <code>ContextDataProvider</code></h3>
+<div class="paragraph">
+<p>In classpath mode, to enable the <code>ContextDataProvider</code>, create a <code>META-INF/services/org.apache.logging.log4j.core.util.ContextDataProvider</code> file with this content:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>io.reactiverse.contextual.logging.log4j.impl.VertxContextDataProvider</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>io.reactiverse.contextual.logging.VertxContextDataProvider</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configuration_of_jul">Configuration of JUL</h3>
+<div class="paragraph">
+<p>The JUL formatter class has been moved to <code>io.reactiverse.contextual.logging.jul.JULContextualDataFormatter</code>.</p>
+</div>
+<div class="paragraph">
+<p>For example, use this configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">handlers=java.util.logging.ConsoleHandler
+java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.JULContextualDataFormatter
+io.reactiverse.contextual.logging.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Instead of:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">handlers=java.util.logging.ConsoleHandler
+java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.jul.JULContextualDataFormatter
+io.reactiverse.contextual.logging.jul.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"</code></pre>
 </div>
 </div>
 </div>
