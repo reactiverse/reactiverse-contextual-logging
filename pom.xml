@@ -32,7 +32,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!--    Remove this and dep management trick below for netty-handler when upgrading to the next Vert.x 5 release -->
     <netty.version>4.2.0.Beta1</netty.version>
-    <vertx.version>5.0.0.CR2</vertx.version>
+    <vertx.version>5.0.0.CR3</vertx.version>
   </properties>
 
   <modules>
