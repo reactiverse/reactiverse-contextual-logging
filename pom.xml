@@ -30,8 +30,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!--    Remove this and dep management trick below for netty-handler when upgrading to the next Vert.x 5 release -->
-    <netty.version>4.2.0.RC1</netty.version>
     <vertx.version>5.0.0.CR3</vertx.version>
   </properties>
 
@@ -53,22 +51,6 @@
         <groupId>io.vertx</groupId>
         <artifactId>vertx-codegen</artifactId>
         <version>${vertx.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-handler</artifactId>
-        <version>${netty.version}</version>
-        <!-- Make sure we don't depend on those jars, because they depend on protobuf/marshalling jars we do not need -->
-        <exclusions>
-          <exclusion>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-protobuf</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-codec-marshalling</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
