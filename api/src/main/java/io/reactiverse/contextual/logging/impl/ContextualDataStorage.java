@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ContextualDataStorage implements VertxServiceProvider {
 
   @SuppressWarnings("rawtypes")
-  static ContextLocal<ConcurrentMap> CONTEXTUAL_DATA_KEY = ContextLocal.registerLocal(ConcurrentMap.class);
+  final static ContextLocal<ConcurrentMap> CONTEXTUAL_DATA_KEY = ContextLocal.registerLocal(ConcurrentMap.class);
 
   @Override
   public void init(VertxBootstrap builder) {
