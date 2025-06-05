@@ -1,7 +1,7 @@
 = Contextual logging for Vert.x
 
 image:https://github.com/reactiverse/reactiverse-contextual-logging/actions/workflows/ci.yml/badge.svg[Build Status,link=https://github.com/reactiverse/reactiverse-contextual-logging/actions/workflows/ci.yml]
-image:https://img.shields.io/maven-central/v/io.reactiverse/reactiverse-contextual-logging[Maven Central]
+image:https://img.shields.io/maven-central/v/io.reactiverse/reactiverse-contextual-logging-api[Maven Central]
 
 Mapped Diagnostic Context (MDC) that works with the Vert.x event-loop model.
 
