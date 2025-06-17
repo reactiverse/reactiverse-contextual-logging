@@ -29,7 +29,7 @@
   <artifactId>reactiverse-contextual-logging-log4j2</artifactId>
 
   <properties>
-    <log4j2.version>2.24.3</log4j2.version>
+    <log4j2.version>2.25.0</log4j2.version>
   </properties>
 
   <dependencies>
