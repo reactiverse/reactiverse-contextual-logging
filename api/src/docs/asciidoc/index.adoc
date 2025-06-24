@@ -1,6 +1,7 @@
 = Contextual logging for Eclipse Vert.x
 :examplesdir: ../../main/java/examples
 :source-highlighter: highlight.js
+:group-id: Unknown
 :artifact-id: Unknown
 :version: Unknown
 :revnumber: {version}
@@ -80,7 +81,7 @@ Declare the converter class and assign it a conversion word:
 [source,xml]
 ----
 <conversionRule conversionWord="vcl"
-                converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+                converterClass="io.reactiverse.contextual.logging.logback.LogbackConverter"/>
 ----
 
 Then use the conversion word in conversion patterns:
@@ -110,7 +111,7 @@ Below is a sample Logback configuration:
 <configuration>
 
   <conversionRule conversionWord="vcl"
-                  converterClass="io.reactiverse.contextual.logging.LogbackConverter"/>
+                  converterClass="io.reactiverse.contextual.logging.logback.LogbackConverter"/>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
