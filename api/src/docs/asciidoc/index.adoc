@@ -371,6 +371,10 @@ java.util.logging.ConsoleHandler.formatter=io.reactiverse.contextual.logging.jul
 io.reactiverse.contextual.logging.jul.JULContextualDataFormatter.format="%{requestId:-foobar}$s ### %5$s%n"
 ----
 
+== References
+
+* https://github.com/reactiverse/reactiverse-contextual-logging[Contextual logging for Eclipse Vert.x repository]
+
 == License
 
 Apache License version 2.0.
