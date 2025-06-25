@@ -614,7 +614,7 @@ To transport distributed traces information, a new <code>localContext</code> dat
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;conversionRule conversionWord="vcl"
-                converterClass="io.reactiverse.contextual.logging.LogbackConverter"/&gt;</code></pre>
+                converterClass="io.reactiverse.contextual.logging.logback.LogbackConverter"/&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -657,7 +657,7 @@ To transport distributed traces information, a new <code>localContext</code> dat
 <pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;configuration&gt;
 
   &lt;conversionRule conversionWord="vcl"
-                  converterClass="io.reactiverse.contextual.logging.LogbackConverter"/&gt;
+                  converterClass="io.reactiverse.contextual.logging.logback.LogbackConverter"/&gt;
 
   &lt;appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"&gt;
     &lt;encoder&gt;
