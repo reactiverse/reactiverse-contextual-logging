@@ -93,14 +93,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
 
-      - name: Create GitHub Release
-        run: |
-          gh release create release/${{ inputs.release_version }} \
-            --title "Release ${{ inputs.release_version }}" \
-            --generate-notes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Set next development version
         run: mvn versions:set -DnewVersion=${{ inputs.next_version }} -DgenerateBackupPoms=false -B
 
@@ -111,3 +103,11 @@ jobs:
 
       - name: Push tag and next development version
         run: git push origin main --follow-tags
+
+      - name: Create GitHub Release
+        run: |
+          gh release create release/${{ inputs.release_version }} \
+            --title "Release ${{ inputs.release_version }}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
