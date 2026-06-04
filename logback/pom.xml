@@ -27,6 +27,7 @@
   </parent>
 
   <artifactId>reactiverse-contextual-logging-logback</artifactId>
+  <name>${project.groupId}:${project.artifactId}</name>
 
   <properties>
     <logback.version>1.4.14</logback.version>

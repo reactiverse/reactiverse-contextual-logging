@@ -27,6 +27,7 @@
   </parent>
 
   <artifactId>reactiverse-contextual-logging-api</artifactId>
+  <name>${project.groupId}:${project.artifactId}</name>
 
   <properties>
     <doc.outputDirectory>${project.build.directory}/generated-docs</doc.outputDirectory>

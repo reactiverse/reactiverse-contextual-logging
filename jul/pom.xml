@@ -27,6 +27,7 @@
   </parent>
 
   <artifactId>reactiverse-contextual-logging-jul</artifactId>
+  <name>${project.groupId}:${project.artifactId}</name>
 
   <properties>
     <logging.config.file>${project.basedir}/src/test/resources/logging.properties</logging.config.file>
