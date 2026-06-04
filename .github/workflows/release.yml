@@ -102,7 +102,7 @@ jobs:
           git commit -m "Development version ${{ inputs.next_version }}"
 
       - name: Push tag and next development version
-        run: git push origin main --follow-tags
+        run: git push origin HEAD:main --follow-tags
 
       - name: Create GitHub Release
         run: |
