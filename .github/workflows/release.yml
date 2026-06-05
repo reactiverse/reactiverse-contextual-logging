@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write
   pages: write
+  id-token: write
 
 jobs:
   Prepare:
@@ -55,6 +56,9 @@ jobs:
     name: Release ${{ inputs.release_version }}
     needs: [ Prepare, Test ]
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -87,11 +91,14 @@ jobs:
           SONATYPE_NEXUS_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PRIVATE_KEY_PASSPHRASE }}
 
-      - name: GitHub Pages Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          path: ./public
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
 
       - name: Set next development version
         run: mvn versions:set -DnewVersion=${{ inputs.next_version }} -DgenerateBackupPoms=false -B
