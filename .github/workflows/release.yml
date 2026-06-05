@@ -113,11 +113,3 @@ jobs:
 
       - name: Push next development version
         run: git push origin HEAD:main
-
-      - name: Create GitHub Release
-        run: |
-          gh release create release/${{ inputs.release_version }} \
-            --title "Release ${{ inputs.release_version }}" \
-            --generate-notes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
