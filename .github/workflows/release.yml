@@ -82,7 +82,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Tag release
-        run: git tag release/${{ inputs.release_version }}
+        run: |
+          TAG=release/${{ inputs.release_version }}
+          git tag -f "$TAG"
+          git push origin "refs/tags/$TAG" --force
 
       - name: Deploy to Maven Central
         run: mvn -Prelease deploy -DskipTests -DskipITs -Ddoc.outputDirectory=${PWD}/public -B
@@ -108,8 +111,8 @@ jobs:
           git add -A
           git commit -m "Development version ${{ inputs.next_version }}"
 
-      - name: Push tag and next development version
-        run: git push origin HEAD:main --follow-tags
+      - name: Push next development version
+        run: git push origin HEAD:main
 
       - name: Create GitHub Release
         run: |
