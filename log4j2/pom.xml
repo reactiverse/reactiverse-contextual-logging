@@ -30,7 +30,7 @@
   <name>${project.groupId}:${project.artifactId}</name>
 
   <properties>
-    <log4j2.version>2.26.0</log4j2.version>
+    <log4j2.version>2.26.1</log4j2.version>
   </properties>
 
   <dependencies>
